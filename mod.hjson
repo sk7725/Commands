@@ -1,0 +1,6 @@
+name: cmd
+displayName: "Commands"
+author: "[royal]sk7725[]"
+description: "Adds various commands to processors.\nThanks to: DeltaNedas"
+version: 0.1
+minGameVersion: 110

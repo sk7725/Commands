@@ -1,6 +1,12 @@
-const cmdList = ["/say", "/title", "/gamerule", "/gamemode", "/ratelimit", "/playsound"];//this playsound will play(), not at()
-const rateList = ["say", "popuptitle", "texttitle", "gamerule"];
+const cmdList = ["say", "title", "gamerule", "gamemode", "ratelimit", "playsound"];//this playsound will play(), not at()
+const rateList = ["say", "popuptitle", "texttitle"];
 const titleList = ["hud", "world", "announce", "infoMessage", "infoToast"];
+const gamemodeList = ["survival", "sandbox", "attack", "pvp", "editor"];
+
+var ratetimer = new Interval(1);//serverside ratelimit interval
+var ratelimitlist = [60, 180, 10];
+
+var prevecore = null;
 
 this.global.cmdCategory = LCategory.blocks;
 const cmdCategory = this.global.cmdCategory;
@@ -25,17 +31,102 @@ const ActionI = {
     switch(Number(cmd)){
       case 0:
         //say
-        if(Vars.net.client()) return; //this is synced
-        const str = vm.obj(this.astr) + "";
+        if(Vars.net.client() || !ratetimer.check(0, ratelimitlist[0])) return; //this is synced
+        var str = vm.obj(this.astr) + "";
 
         if(str == "" || str == "null") return;
         Call.sendMessage(str);
-        break;
+        ratetimer.reset(0, 0);
+      break;
+
+      case 1:
+        //title
+      break;
+
+      case 2:
+        //gamerule
+        var str = vm.obj(this.astr) + "";
+        try{
+          var rule = Vars.state.rules[str];
+          switch(typeof rule){
+            case "boolean":
+            Vars.state.rules[str] = vm.bool(this.atitle);
+            break;
+            case "number":
+            Vars.state.rules[str] = vm.numf(this.atitle);
+            break;
+            default:
+            //nope.
+          }
+        }
+        catch(ruleNotFound){}
+      break;
+
+      case 3:
+        //gamemode
+        var type = vm.numi(this.astr);
+        if(type > 4 || type < 0) return;
+        if(type != 4 && prevecore !== null){
+          Vars.state.rules.enemyCoreBuildRadius = prevecore;
+          prevecore = null;
+          Vars.state.rules.editor = false;
+        }
+        switch(type){
+          case 0:
+          Vars.state.rules.waveTimer = true;
+          Vars.state.rules.waves = true;
+          Vars.state.rules.infiniteResources = false;
+          Vars.state.rules.attackMode = false;
+          Vars.state.rules.pvp = false;
+          break;
+          case 1:
+          Vars.state.rules.waveTimer = false;
+          Vars.state.rules.waves = true;
+          Vars.state.rules.infiniteResources = true;
+          Vars.state.rules.attackMode = false;
+          Vars.state.rules.pvp = false;
+          break;
+          case 2:
+          Vars.state.rules.waveTimer = true;
+          Vars.state.rules.waves = true;
+          Vars.state.rules.infiniteResources = false;
+          Vars.state.rules.attackMode = true;
+          Vars.state.rules.pvp = false;
+          break;
+          case 3:
+          Vars.state.rules.waveTimer = true;
+          Vars.state.rules.waves = true;
+          Vars.state.rules.infiniteResources = false;
+          Vars.state.rules.attackMode = true;
+          Vars.state.rules.pvp = true;
+          break;
+          case 4:
+          Vars.state.rules.waveTimer = false;
+          Vars.state.rules.waves = false;
+          Vars.state.rules.infiniteResources = true;
+          Vars.state.rules.attackMode = false;
+          Vars.state.rules.pvp = false;
+          Vars.state.rules.editor = true;
+          if(prevecore === null) prevecore = Vars.state.rules.enemyCoreBuildRadius - 0;
+          Vars.state.rules.enemyCoreBuildRadius = 0;
+          break;
+          default:
+        }
+      break;
+
+      case 4:
+        //ratelimit
+        if(Vars.net.client()) return;
+        var type = vm.numi(this.astr);
+        var ticks = vm.numi(this.atitle);
+        if(type < 0 || type > 2 || ticks < 0) return;
+        ratelimitlist[type] = ticks;
+      break;
 
       case 5:
         //playsound 1
         if(Vars.headless) return;//headless is deaf
-        const sound = vm.obj(this.astr) + "";
+        var sound = vm.obj(this.astr) + "";
         if(sound == "" || sound == "null") return;
 
         var vol = vm.numf(this.atitle);
@@ -44,14 +135,14 @@ const ActionI = {
 
         var pitch = vm.numf(this.a1);
         if(pitch <= 0.00001) pitch = 1;
-        pitch = Mathf.clamp(pitch, 0.5, 2.0);
-        const pan = Mathf.clamp(vm.numf(this.a2), -1.0, 1.0);
+        //pitch = Mathf.clamp(pitch, 0.5, 2.0);
+        var pan = Mathf.clamp(vm.numf(this.a2), -1.0, 1.0);
 
         try{
           Sounds[sound].play(vol, pitch, pan);
         }
         catch(notFound){}
-        break;
+      break;
 
       default:
 
@@ -123,8 +214,7 @@ const ActionStatement = {
           t.add("y");
           this.field(t, this.ay, text => {this.ay = text}).width(90);
         })).left();
-
-        break;
+      break;
 
       case 2:
         table.add("rule");
@@ -135,15 +225,15 @@ const ActionStatement = {
 
       case 3:
         table.add("mode");
-        this.field(table, this.astr, text => {this.astr = text}).width(90);
-        break;
+        this.fieldlist(table, gamemodeList, this.astr, "astr", table);
+      break;
 
       case 4:
         table.add("type");
         this.fieldlist(table, rateList, this.astr, "astr", table);
         table.add("ticks");
         this.field(table, this.atitle, text => {this.atitle = text}).width(90);
-        break;
+      break;
 
       case 5:
         table.add("sound");
@@ -154,7 +244,7 @@ const ActionStatement = {
         this.field(table, this.a1, text => {this.a1 = text}).width(90);
         table.add("pan");
         this.field(table, this.a2, text => {this.a2 = text}).width(90);
-        break;
+      break;
 
       default:
         table.add("[lightgray]invalid command[]");
@@ -164,9 +254,9 @@ const ActionStatement = {
 
   fieldlist(table, list, def, defname, parent){
     var b = new Button(Styles.logict);
-    var n = Number(def);
-    if(isNaN(n) || n < 0 || n >= list.length) this[defname] = 0;
-    b.label(prov(() => list[Number(def)]));
+    //var n = Number(def);
+    //if(isNaN(n) || n < 0 || n >= list.length) this[defname] = 0;
+    b.label(prov(() => ((defname == "cmd")?"/":"") + list[Number(def)]));
     b.clicked(() => this.showSelect(b, list, list[Number(def)], t => {
         this[defname] = list.indexOf(t);
         if(parent !== false) this.buildt(parent);

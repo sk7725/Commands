@@ -1,2 +1,2 @@
 require("cmd/commands/action");
-//require("cmd/get");
+require("cmd/get");

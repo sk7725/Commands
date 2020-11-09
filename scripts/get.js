@@ -6,160 +6,56 @@ const colorTypeList = ["name", "hex", "rgb", "hsv"];
 //const cmdCategory = this.global.cmdCategory;
 
 //partial credits to DeltaNedas
-const ActionI = {
-  _(builder, cmd, astr, atitle, a1, a2, ax, ay) {
-    this.cmd = builder.var(cmd);
-    this.astr = builder.var(astr);
-    this.atitle = builder.var(atitle);
-    this.a1 = builder.var(a1);
-    this.a2 = builder.var(a2);
-    this.ax = builder.var(ax);
-    this.ay = builder.var(ay);
+const GetContI = {
+  _(builder, res, cont, type, val, vg, vb) {
+    this.res = builder.var(res);
+    this.cont = builder.var(cont);
+    this.type = builder.var(type);
+    this.val = builder.var(val);
+    this.vg = builder.var(vg);
+    this.vb = builder.var(vb);
   },
 
   run(vm) {
-    const cmd = vm.numi(this.cmd);
+    const cont = Number(vm.numi(this.cont));
 
-    //print("Cmd: "+cmd);
-
-    switch(Number(cmd)){
-      case 0:
-        //say
-        if(Vars.net.client() || !ratetimer.check(0, ratelimitlist[0])) return; //this is synced
-        var str = vm.obj(this.astr) + "";
-
-        if(str == "" || str == "null") return;
-        Call.sendMessage(str);
-        ratetimer.reset(0, 0);
-      break;
-
-      case 1:
-        //title
-      break;
-
-      case 2:
-        //gamerule
-        var str = vm.obj(this.astr) + "";
-        try{
-          var rule = Vars.state.rules[str];
-          switch(typeof rule){
-            case "boolean":
-            Vars.state.rules[str] = vm.bool(this.atitle);
-            break;
-            case "number":
-            Vars.state.rules[str] = vm.numf(this.atitle);
-            break;
-            default:
-            //nope.
-          }
-        }
-        catch(ruleNotFound){}
-      break;
-
-      case 3:
-        //gamemode
-        var type = vm.numi(this.astr);
-        if(type > 4 || type < 0) return;
-        if(type != 4 && prevecore !== null){
-          Vars.state.rules.enemyCoreBuildRadius = prevecore;
-          prevecore = null;
-          Vars.state.rules.editor = false;
-        }
-        switch(type){
-          case 0:
-          Vars.state.rules.waveTimer = true;
-          Vars.state.rules.waves = true;
-          Vars.state.rules.infiniteResources = false;
-          Vars.state.rules.attackMode = false;
-          Vars.state.rules.pvp = false;
-          break;
-          case 1:
-          Vars.state.rules.waveTimer = false;
-          Vars.state.rules.waves = true;
-          Vars.state.rules.infiniteResources = true;
-          Vars.state.rules.attackMode = false;
-          Vars.state.rules.pvp = false;
-          break;
-          case 2:
-          Vars.state.rules.waveTimer = true;
-          Vars.state.rules.waves = true;
-          Vars.state.rules.infiniteResources = false;
-          Vars.state.rules.attackMode = true;
-          Vars.state.rules.pvp = false;
-          break;
-          case 3:
-          Vars.state.rules.waveTimer = true;
-          Vars.state.rules.waves = true;
-          Vars.state.rules.infiniteResources = false;
-          Vars.state.rules.attackMode = true;
-          Vars.state.rules.pvp = true;
-          break;
-          case 4:
-          Vars.state.rules.waveTimer = false;
-          Vars.state.rules.waves = false;
-          Vars.state.rules.infiniteResources = true;
-          Vars.state.rules.attackMode = false;
-          Vars.state.rules.pvp = false;
-          Vars.state.rules.editor = true;
-          if(prevecore === null) prevecore = Vars.state.rules.enemyCoreBuildRadius - 0;
-          Vars.state.rules.enemyCoreBuildRadius = 0;
-          break;
-          default:
-        }
-      break;
-
-      case 4:
-        //ratelimit
-        if(Vars.net.client()) return;
-        var type = vm.numi(this.astr);
-        var ticks = vm.numi(this.atitle);
-        if(type < 0 || type > 2 || ticks < 0) return;
-        ratelimitlist[type] = ticks;
-      break;
-
-      case 5:
-        //playsound 1
-        if(Vars.headless) return;//headless is deaf
-        var sound = vm.obj(this.astr) + "";
-        if(sound == "" || sound == "null") return;
-
-        var vol = vm.numf(this.atitle);
-        vol = Mathf.clamp(vol, 0, 1);
-        vol *= (Core.settings.getInt("sfxvol") / 100);
-
-        var pitch = vm.numf(this.a1);
-        if(pitch <= 0.00001) pitch = 1;
-        //pitch = Mathf.clamp(pitch, 0.5, 2.0);
-        var pan = Mathf.clamp(vm.numf(this.a2), -1.0, 1.0);
-
-        try{
-          Sounds[sound].play(vol, pitch, pan);
-        }
-        catch(notFound){}
-      break;
-
-      default:
-
-      //end
+    if((0 <= cont && cont < 4) || cont == 6 || cont == 7){
+      //getbyname & getbyid
+      var type = vm.numi(this.type);
+      vm.setobj(this.res, (type == 0) ? Vars.content.getByName(ContentType[contentList[cont]], vm.obj(this.val) + "") : Vars.content.getByID(ContentType[contentList[cont]], vm.numi(this.val)));
+    }
+    else if(cont == 4){
+      //Bullet
+    }
+    else if(cont == 5){
+      //Fx
+    }
+    else if(cont == 8){
+      //Sound, this is cheating ik
+      var arr = Object.keys(Sounds).filter(s => (typeof s) == "object");
+      print(arr.join(", "));
+      vm.setobj(this.res, (vm.numi(this.type) == 0) ? vm.obj(this.val) + "" : arr[vm.numi(this.val)] + "");
+    }
+    else if(cont == 9){
+      //Color
     }
   }
 };
 
-const ActionStatement = {
+const GetContStatement = {
   new: words => {
-    const st = extend(LStatement, Object.create(ActionStatement));
+    const st = extend(LStatement, Object.create(GetContStatement));
     st.read(words);
     return st;
   },
 
   read(words) {
-    this.cmd = words[1];
-    this.astr = words[2];
-    this.atitle = words[3];
-    this.a1 = words[4];
-    this.a2 = words[5];
-    this.ax = words[6];
-    this.ay = words[7];
+    this.res = words[1];
+    this.cont = words[2];
+    this.type = words[3];
+    this.val = words[4];
+    this.vg = words[5];
+    this.vb = words[6];
   },
 
   build(h) {
@@ -167,8 +63,8 @@ const ActionStatement = {
       return this.buildt(h);
     }
 
-    const inst = extend(LExecutor.LInstruction, Object.create(ActionI));
-    inst._(h, this.cmd, this.astr, this.atitle, this.a1, this.a2, this.ax, this.ay);
+    const inst = extend(LExecutor.LInstruction, Object.create(GetContI));
+    inst._(h, this.res, this.cont, this.type, this.val, this.vg, this.vb);
     return inst;
   },
 
@@ -176,77 +72,40 @@ const ActionStatement = {
     //todo dropdown
     table.clearChildren();//this just sounds horrible
 
-    this.fieldlist(table, cmdList, this.cmd, "cmd", table);
-    switch(Number(this.cmd)){
-      case 0:
-        table.add("message");
-        this.field(table, this.astr, text => {this.astr = text}).width(0).growX().padRight(3);
+    this.field(table, this.res, text => {this.res = text}).width(90);
+    table.add(" = ");
+    this.fieldlist(table, contentList, this.cont, "cont", table, 120);
+    this.row(table);
 
-        break;
-
-      case 1:
-        table.table(cons(t => {
-          t.left();
-          t.setColor(table.color);
-          t.add("message");
-          this.field(t, this.astr, text => {this.astr = text}).width(0).growX();
-          t.add("title");
-          this.field(t, this.atitle, text => {this.atitle = text}).width(180).padRight(3);
-        })).left();
-
-        table.row();
-        table.add();
-        table.table(cons(t => {
-          t.left();
-          t.setColor(table.color);
-          t.add("type");
-          this.fieldlist(t, titleList, this.a1, "a1", table);
-          t.add("duration");
-          this.field(t, this.a2, text => {this.a2 = text}).width(90);
-          t.add("x");
-          this.field(t, this.ax, text => {this.ax = text}).width(90);
-          t.add("y");
-          this.field(t, this.ay, text => {this.ay = text}).width(90);
-        })).left();
-      break;
-
-      case 2:
-        table.add("rule");
-        this.field(table, this.astr, text => {this.astr = text});
-        table.add("value");
-        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
-        break;
-
-      case 3:
-        table.add("mode");
-        this.fieldlist(table, gamemodeList, this.astr, "astr", table);
-      break;
-
-      case 4:
-        table.add("type");
-        this.fieldlist(table, rateList, this.astr, "astr", table);
-        table.add("ticks");
-        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
-      break;
-
-      case 5:
-        table.add("sound");
-        this.field(table, this.astr, text => {this.astr = text}).width(120);
-        table.add("volume");
-        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
-        table.add("pitch");
-        this.field(table, this.a1, text => {this.a1 = text}).width(90);
-        table.add("pan");
-        this.field(table, this.a2, text => {this.a2 = text}).width(90);
-      break;
-
-      default:
-        table.add("[lightgray]invalid command[]");
+    if(this.cont == 9){
+      table.add(" getby");
+      this.fieldlist(table, colorTypeList, this.type, "type", table, 85);
+      this.row(table);
+      if(this.type == 0 || this.type == 1){
+        if(this.type == 1) table.add(" #");
+        this.field(table, this.val, text => {this.val = text}).width(180);
+      }
+      else if(this.type == 2){
+        this.fields(table, "r", this.val, text => {this.val = text});
+        this.fields(table, "g", this.vg, text => {this.vg = text});
+        this.fields(table, "b", this.vb, text => {this.vb = text});
+      }
+      else if(this.type == 3){
+        this.fields(table, "h", this.val, text => {this.val = text});
+        this.fields(table, "s", this.vg, text => {this.vg = text});
+        this.fields(table, "v", this.vb, text => {this.vb = text});
+      }
     }
-
+    else{
+      table.add(" getby");
+      this.fieldlist(table, typeList, this.type, "type", table, 85);
+      this.row(table);
+      this.field(table, this.val, text => {this.val = text}).width(180);
+    }
   },
 
-  fieldlist(table, list, def, defname, parent){
+  fieldlist(table, list, def, defname, parent, w){
+    if(w === undefined) w = 120;
     var b = new Button(Styles.logict);
     //var n = Number(def);
     //if(isNaN(n) || n < 0 || n >= list.length) this[defname] = 0;
@@ -255,23 +114,21 @@ const ActionStatement = {
         this[defname] = list.indexOf(t);
         if(parent !== false) this.buildt(parent);
     }, 2, cell => cell.size(100, 50)));
-    table.add(b).size(120, 40).color(table.color).left().padLeft(2);
+    table.add(b).size(w, 40).color(table.color).left().padLeft(2);
   },
 
   write(builder) {
-    builder.append("cmdaction " + this.cmd + "");
+    builder.append("getcont " + this.res + "");
     builder.append(" ");
-    builder.append(this.astr + "");
+    builder.append(this.cont + "");
     builder.append(" ");
-    builder.append(this.atitle + "");
+    builder.append(this.type + "");
     builder.append(" ");
-    builder.append(this.a1 + "");
+    builder.append(this.val + "");
     builder.append(" ");
-    builder.append(this.a2 + "");
+    builder.append(this.vg + "");
     builder.append(" ");
-    builder.append(this.ax + "");
-    builder.append(" ");
-    builder.append(this.ay + "");
+    builder.append(this.vb + "");
   },
 
   name: () => "Get Content",
@@ -279,10 +136,11 @@ const ActionStatement = {
 };
 
 /* Mimic @RegisterStatement */
-LAssembler.customParsers.put("getcon", func(ActionStatement.new));
+LAssembler.customParsers.put("getcont", func(GetContStatement.new));
 
-LogicIO.allStatements.add(prov(() => ActionStatement.new([
-  "getcon",
+LogicIO.allStatements.add(prov(() => GetContStatement.new([
+  "getcont",
+  "result",
   "0",
   "0",
   '""',

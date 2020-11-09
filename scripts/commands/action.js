@@ -185,7 +185,7 @@ const ActionStatement = {
     this.fieldlist(table, cmdList, this.cmd, "cmd", table);
     switch(Number(this.cmd)){
       case 0:
-        table.add("message");
+        table.add(" message");
         this.field(table, this.astr, text => {this.astr = text}).width(0).growX().padRight(3);
 
         break;
@@ -194,9 +194,9 @@ const ActionStatement = {
         table.table(cons(t => {
           t.left();
           t.setColor(table.color);
-          t.add("message");
+          t.add(" message");
           this.field(t, this.astr, text => {this.astr = text}).width(0).growX();
-          t.add("title");
+          t.add(" title")
           this.field(t, this.atitle, text => {this.atitle = text}).width(180).padRight(3);
         })).left();
 
@@ -205,45 +205,35 @@ const ActionStatement = {
         table.table(cons(t => {
           t.left();
           t.setColor(table.color);
-          t.add("type");
+          t.add(" type");
           this.fieldlist(t, titleList, this.a1, "a1", table);
-          t.add("duration");
-          this.field(t, this.a2, text => {this.a2 = text}).width(90);
-          t.add("x");
-          this.field(t, this.ax, text => {this.ax = text}).width(90);
-          t.add("y");
-          this.field(t, this.ay, text => {this.ay = text}).width(90);
+          this.fields(t, "duration", this.a2, text => {this.a2 = text});
+          this.fields(t, "x", this.ax, text => {this.ax = text});
+          this.fields(t, "y", this.ay, text => {this.ay = text});
         })).left();
       break;
 
       case 2:
-        table.add("rule");
-        this.field(table, this.astr, text => {this.astr = text});
-        table.add("value");
-        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
+        this.fields(table, "rule", this.astr, text => {this.astr = text}).width(180);
+        this.fields(table, "value", this.atitle, text => {this.atitle = text});
         break;
 
       case 3:
-        table.add("mode");
+        table.add(" mode");
         this.fieldlist(table, gamemodeList, this.astr, "astr", table);
       break;
 
       case 4:
-        table.add("type");
+        table.add(" type");
         this.fieldlist(table, rateList, this.astr, "astr", table);
-        table.add("ticks");
-        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
+        this.fields(table, "ticks", this.atitle, text => {this.atitle = text});
       break;
 
       case 5:
-        table.add("sound");
-        this.field(table, this.astr, text => {this.astr = text}).width(120);
-        table.add("volume");
-        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
-        table.add("pitch");
-        this.field(table, this.a1, text => {this.a1 = text}).width(90);
-        table.add("pan");
-        this.field(table, this.a2, text => {this.a2 = text}).width(90);
+        this.fields(table, "sounds", this.astr, text => {this.astr = text}).width(120);
+        this.fields(table, "volume", this.atitle, text => {this.atitle = text});
+        this.fields(table, "pitch", this.a1, text => {this.a1 = text});
+        this.fields(table, "pan", this.a2, text => {this.a2 = text});
       break;
 
       default:

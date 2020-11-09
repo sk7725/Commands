@@ -1,4 +1,9 @@
-const cmdList = ["say", "title", "gamerule", "gamemode", "playsound"];//this playsound will play(), not at()
+const cmdList = ["/say", "/title", "/gamerule", "/gamemode", "/ratelimit", "/playsound"];//this playsound will play(), not at()
+const rateList = ["say", "popuptitle", "texttitle", "gamerule"];
+const titleList = ["hud", "world", "announce", "infoMessage", "infoToast"];
+
+this.global.cmdCategory = LCategory.blocks;
+const cmdCategory = this.global.cmdCategory;
 
 //partial credits to DeltaNedas
 const ActionI = {
@@ -15,29 +20,26 @@ const ActionI = {
   run(vm) {
     const cmd = vm.numi(this.cmd);
 
-    print("Cmd: "+cmd);
+    //print("Cmd: "+cmd);
 
     switch(Number(cmd)){
       case 0:
         //say
         if(Vars.net.client()) return; //this is synced
-        const str = vm.vars[this.astr].objval+"";
-        const name = vm.vars[this.atitle].objval+"";
-        print("Trysay: "+str);
-        print("Name: "+name);
-        if(!(str instanceof String)) return;
-        if((name instanceof String) && name != "") Call.sendMessage(str, name, null);
-        else Call.sendMessage(str);
+        const str = vm.obj(this.astr) + "";
+
+        if(str == "" || str == "null") return;
+        Call.sendMessage(str);
         break;
 
-      case 4:
+      case 5:
         //playsound 1
         if(Vars.headless) return;//headless is deaf
-        const sound = vm.obj(this.astr);
-        if(!(sound instanceof String)) return;
+        const sound = vm.obj(this.astr) + "";
+        if(sound == "" || sound == "null") return;
 
         var vol = vm.numf(this.atitle);
-        vol = Mathf.clamp(vol, 0, 1)
+        vol = Mathf.clamp(vol, 0, 1);
         vol *= (Core.settings.getInt("sfxvol") / 100);
 
         var pitch = vm.numf(this.a1);
@@ -87,60 +89,89 @@ const ActionStatement = {
 
   buildt(table) {
     //todo dropdown
-    this.field(table, this.cmd, text => {this.cmd = text});
+    table.clearChildren();//this just sounds horrible
+
+    this.fieldlist(table, cmdList, this.cmd, "cmd", table);
     switch(Number(this.cmd)){
       case 0:
         table.add("message");
-        this.field(table, this.astr, text => {this.astr = text});
-        table.add("name");
-        this.field(table, this.atitle, text => {this.atitle = text});
+        this.field(table, this.astr, text => {this.astr = text}).width(0).growX().padRight(3);
+
         break;
 
       case 1:
+        table.table(cons(t => {
+          t.left();
+          t.setColor(table.color);
+          t.add("message");
+          this.field(t, this.astr, text => {this.astr = text}).width(0).growX();
+          t.add("title");
+          this.field(t, this.atitle, text => {this.atitle = text}).width(180).padRight(3);
+        })).left();
+
         table.row();
-        table.add("message");
-        this.field(table, this.astr, text => {this.astr = text});
-        table.add("title");
-        this.field(table, this.atitle, text => {this.atitle = text});
-        table.add("type");
-        this.field(table, this.a1, text => {this.a1 = text});
-        table.row();
-        table.add("duration");
-        this.field(table, this.a2, text => {this.a2 = text});
-        table.add("x");
-        this.field(table, this.ax, text => {this.ax = text});
-        table.add("y");
-        this.field(table, this.ay, text => {this.ay = text});
+        table.add();
+        table.table(cons(t => {
+          t.left();
+          t.setColor(table.color);
+          t.add("type");
+          this.fieldlist(t, titleList, this.a1, "a1", table);
+          t.add("duration");
+          this.field(t, this.a2, text => {this.a2 = text}).width(90);
+          t.add("x");
+          this.field(t, this.ax, text => {this.ax = text}).width(90);
+          t.add("y");
+          this.field(t, this.ay, text => {this.ay = text}).width(90);
+        })).left();
+
         break;
 
       case 2:
         table.add("rule");
         this.field(table, this.astr, text => {this.astr = text});
         table.add("value");
-        this.field(table, this.atitle, text => {this.atitle = text});
+        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
         break;
 
       case 3:
         table.add("mode");
-        this.field(table, this.astr, text => {this.astr = text});
+        this.field(table, this.astr, text => {this.astr = text}).width(90);
         break;
 
       case 4:
-        table.row();
+        table.add("type");
+        this.fieldlist(table, rateList, this.astr, "astr", table);
+        table.add("ticks");
+        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
+        break;
+
+      case 5:
         table.add("sound");
-        this.field(table, this.astr, text => {this.astr = text});
+        this.field(table, this.astr, text => {this.astr = text}).width(120);
         table.add("volume");
-        this.field(table, this.atitle, text => {this.atitle = text});
+        this.field(table, this.atitle, text => {this.atitle = text}).width(90);
         table.add("pitch");
-        this.field(table, this.a1, text => {this.a1 = text});
+        this.field(table, this.a1, text => {this.a1 = text}).width(90);
         table.add("pan");
-        this.field(table, this.a2, text => {this.a2 = text});
+        this.field(table, this.a2, text => {this.a2 = text}).width(90);
         break;
 
       default:
         table.add("[lightgray]invalid command[]");
     }
 
+  },
+
+  fieldlist(table, list, def, defname, parent){
+    var b = new Button(Styles.logict);
+    var n = Number(def);
+    if(isNaN(n) || n < 0 || n >= list.length) this[defname] = 0;
+    b.label(prov(() => list[Number(def)]));
+    b.clicked(() => this.showSelect(b, list, list[Number(def)], t => {
+        this[defname] = list.indexOf(t);
+        if(parent !== false) this.buildt(parent);
+    }, 2, cell => cell.size(100, 50)));
+    table.add(b).size(120, 40).color(table.color).left().padLeft(2);
   },
 
   write(builder) {
@@ -160,7 +191,7 @@ const ActionStatement = {
   },
 
   name: () => "Command: Action",
-  category: () => LCategory.blocks
+  category: () => cmdCategory
 };
 
 /* Mimic @RegisterStatement */
@@ -169,8 +200,8 @@ LAssembler.customParsers.put("cmdaction", func(ActionStatement.new));
 LogicIO.allStatements.add(prov(() => ActionStatement.new([
   "cmdaction",
   "0",
-  "Hello World!",
-  "@",
+  '""',
+  "",
   "1",
   "0",
   "0",

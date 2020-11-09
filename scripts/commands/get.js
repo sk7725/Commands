@@ -1,15 +1,9 @@
-const cmdList = ["say", "title", "gamerule", "gamemode", "ratelimit", "playsound"];//this playsound will play(), not at()
-const rateList = ["say", "popuptitle", "texttitle"];
-const titleList = ["hud", "world", "announce", "infoMessage", "infoToast"];
-const gamemodeList = ["survival", "sandbox", "attack", "pvp", "editor"];
+const contentList = ["block", "item", "unit", "liquid", "bullet", "effect", "status", "weather", "sound", "color"];
+const typeList = ["name", "id"];
+const colorTypeList = ["name", "hex", "rgb", "hsv"];
 
-var ratetimer = new Interval(1);//serverside ratelimit interval
-var ratelimitlist = [60, 180, 10];
-
-var prevecore = null;
-
-this.global.cmdCategory = LCategory.blocks;
-const cmdCategory = this.global.cmdCategory;
+//this.global.cmdCategory = LCategory.blocks;
+//const cmdCategory = this.global.cmdCategory;
 
 //partial credits to DeltaNedas
 const ActionI = {
@@ -280,20 +274,18 @@ const ActionStatement = {
     builder.append(this.ay + "");
   },
 
-  name: () => "Command: Action",
-  category: () => cmdCategory
+  name: () => "Get Content",
+  category: () => LCategory.operations
 };
 
 /* Mimic @RegisterStatement */
-LAssembler.customParsers.put("cmdaction", func(ActionStatement.new));
+LAssembler.customParsers.put("getcon", func(ActionStatement.new));
 
 LogicIO.allStatements.add(prov(() => ActionStatement.new([
-  "cmdaction",
+  "getcon",
+  "0",
   "0",
   '""',
-  "",
-  "1",
-  "0",
   "0",
   "0"
 ])));

@@ -68,7 +68,10 @@ const GetContI = {
       else if(type == 1){
         var color = vm.obj(this.val) + "";
         //if(color.length > 7 || color.length < 6) return;//ewww color
-        vm.setobj(this.res, Color.valueOf(color).toString());
+        try{
+          vm.setobj(this.res, Color.valueOf(color).toString());
+        }
+        catch(invalidColor){}
       }
       else if(type == 2){
         //rgb
@@ -123,32 +126,48 @@ const GetContStatement = {
     this.row(table);
 
     if(this.cont == 9){
-      table.add(" getby");
-      this.fieldlist(table, colorTypeList, this.type, "type", table, 85);
+      table.table(cons(t => {
+        t.left();
+        t.setColor(table.color);
+        t.add(" getby");
+        this.fieldlist(t, colorTypeList, this.type, "type", table, 85);
+        if(this.type == 0 || this.type == 1){
+          //if(this.type == 1) table.add(" #");
+          this.field(t, this.val, text => {this.val = text}).width(180).left();
+        }
+      })).left();
+
       this.row(table);
-      if(this.type == 0 || this.type == 1){
-        if(this.type == 1) table.add(" #");
-        this.field(table, this.val, text => {this.val = text}).width(180);
-      }
-      else if(this.type == 2){
-        this.fields(table, "r", this.val, text => {this.val = text});
-        this.fields(table, "g", this.vg, text => {this.vg = text});
-        this.row(table);
-        this.fields(table, "b", this.vb, text => {this.vb = text});
+
+      if(this.type == 2){
+        table.table(cons(t => {
+          t.left();
+          t.setColor(table.color);
+          this.fields(t, "r", this.val, text => {this.val = text});
+          this.fields(t, "g", this.vg, text => {this.vg = text});
+          this.fields(t, "b", this.vb, text => {this.vb = text});
+        })).left();
       }
       else if(this.type == 3){
-        this.fields(table, "h", this.val, text => {this.val = text});
-        this.fields(table, "s", this.vg, text => {this.vg = text});
-        this.row(table);
-        this.fields(table, "v", this.vb, text => {this.vb = text});
+        table.table(cons(t => {
+          t.left();
+          t.setColor(table.color);
+          this.fields(t, "h", this.val, text => {this.val = text});
+          this.fields(t, "s", this.vg, text => {this.vg = text});
+          this.fields(t, "v", this.vb, text => {this.vb = text});
+        })).left();
       }
     }
     else{
-      table.add(" getby");
-      if(this.cont == 5) this.fakelist(table, "name", 85);
-      else this.fieldlist(table, typeList, this.type, "type", table, 85);
-      this.row(table);
-      this.field(table, this.val, text => {this.val = text}).width(180);
+      table.table(cons(t => {
+        t.left();
+        t.setColor(table.color);
+        t.add(" getby");
+        if(this.cont == 5) this.fakelist(t, "name", 85);
+        else this.fieldlist(t, typeList, this.type, "type", table, 85);
+        //this.row(table);
+        this.field(t, this.val, text => {this.val = text}).width(180);
+      })).left();
     }
   },
 

@@ -8,7 +8,7 @@ var ratelimitlist = [60, 180, 10];
 
 var prevecore = null;
 
-this.global.cmdCategory = LCategory.blocks;
+this.global.cmdCategory = Pal.accent;
 const cmdCategory = this.global.cmdCategory;
 
 //partial credits to DeltaNedas
@@ -304,7 +304,7 @@ const ActionStatement = {
   },
 
   name: () => "Command: Action",
-  category: () => cmdCategory
+  color: () => cmdCategory
 };
 
 /* Mimic @RegisterStatement */

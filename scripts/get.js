@@ -79,7 +79,7 @@ const GetContI = {
       }
       else if(type == 3){
         //hsv
-        vm.setobj(this.res, Tmp.cl.alpha(1).fromHsv(vm.numi(this.val), vm.numi(this.vg), vm.numi(this.vb)).toString());
+        vm.setobj(this.res, Tmp.c1.set(1, 1, 1, 1).fromHsv(vm.numi(this.val), vm.numi(this.vg), vm.numi(this.vb)).toString());
       }
     }
   }
@@ -205,7 +205,7 @@ const GetContStatement = {
   },
 
   name: () => "Get Content",
-  category: () => LCategory.operations
+  color: () => Pal.logicOperations
 };
 
 /* Mimic @RegisterStatement */

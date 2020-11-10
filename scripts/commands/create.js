@@ -231,7 +231,7 @@ const CreateStatement = {
   },
 
   name: () => "Command: Create",
-  category: () => cmdCategory
+  color: () => cmdCategory
 };
 
 /* Mimic @RegisterStatement */

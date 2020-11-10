@@ -48,7 +48,7 @@ const ToStrStatement = {
   },
 
   name: () => "To String",
-  category: () => LCategory.operations
+  color: () => Pal.logicOperations
 };
 
 /* Mimic @RegisterStatement */

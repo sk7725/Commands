@@ -28,7 +28,7 @@ const ActionI = {
 
     //print("Cmd: "+cmd);
 
-    switch(Number(cmd)){
+    switch(cmd){
       case 0:
         //say
         if(Vars.net.client() || !ratetimer.check(0, ratelimitlist[0])) return; //this is synced

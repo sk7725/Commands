@@ -2,6 +2,11 @@ const contentList = ["block", "item", "unit", "liquid", "bullet", "effect", "sta
 const typeList = ["name", "id"];
 const colorTypeList = ["name", "hex", "rgb", "hsv"];
 
+const soundArr = Object.keys(Sounds).filter(s => (typeof Sounds[s]) == "object").sort();
+const arrc = Object.keys(Color).filter(s => (typeof Color[s]) == "object").sort();
+const arrp = Object.keys(Pal).filter(s => (typeof Pal[s]) == "object").sort();
+const fxArr = Object.keys(Fx).filter(s => (typeof Fx[s]) == "object");
+
 //this.global.cmdCategory = LCategory.blocks;
 //const cmdCategory = this.global.cmdCategory;
 
@@ -26,18 +31,53 @@ const GetContI = {
     }
     else if(cont == 4){
       //Bullet
+      var type = vm.numi(this.type);
+      if(type == 0){
+        try{
+          vm.setobj(this.res, Bullets[vm.obj(this.val) + ""]);
+        }
+        catch(notFound){
+          vm.setobj(this.res, null);
+        }
+      }
+      else vm.setobj(this.res, Vars.content.getByID(ContentType.bullet, vm.numi(this.val)));
     }
     else if(cont == 5){
-      //Fx
+      vm.setobj(this.res, fxArr.indexOf(vm.obj(this.val) + "") > -1 ? vm.obj(this.val) : null);
     }
     else if(cont == 8){
       //Sound, this is cheating ik
-      var arr = Object.keys(Sounds).filter(s => (typeof s) == "object");
-      print(arr.join(", "));
-      vm.setobj(this.res, (vm.numi(this.type) == 0) ? vm.obj(this.val) + "" : arr[vm.numi(this.val)] + "");
+      var tmpid = 0;
+      if(vm.numi(this.type) != 0) tmpid = vm.numi(this.val);
+      else tmpid = soundArr.indexOf(vm.obj(this.val) + "");
+      if(tmpid < 0 || tmpid >= soundArr.length) vm.setobj(this.res, null);
+      else vm.setobj(this.res, soundArr[tmpid]);
     }
     else if(cont == 9){
       //Color
+      var type = vm.numi(this.type);
+      if(type == 0){
+        //name
+        var color = vm.obj(this.val) + "";
+        try{
+          if(arrc.indexOf(color) > -1) vm.setobj(this.res, Color[color].toString());
+          else if(arrp.indexOf(color) > -1) vm.setobj(this.res, Pal[color].toString());
+        }
+        catch(invalidColor){}
+      }
+      else if(type == 1){
+        var color = vm.obj(this.val) + "";
+        //if(color.length > 7 || color.length < 6) return;//ewww color
+        vm.setobj(this.res, Color.valueOf(color).toString());
+      }
+      else if(type == 2){
+        //rgb
+        vm.setobj(this.res, Color.rgb(vm.numi(this.val), vm.numi(this.vg), vm.numi(this.vb)).toString());
+      }
+      else if(type == 3){
+        //hsv
+        vm.setobj(this.res, Tmp.cl.alpha(1).fromHsv(vm.numi(this.val), vm.numi(this.vg), vm.numi(this.vb)).toString());
+      }
     }
   }
 };
@@ -98,14 +138,14 @@ const GetContStatement = {
     }
     else{
       table.add(" getby");
-      this.fieldlist(table, typeList, this.type, "type", table, 85);
+      if(this.cont == 5) this.fakelist(table, "name", 85);
+      else this.fieldlist(table, typeList, this.type, "type", table, 85);
       this.row(table);
       this.field(table, this.val, text => {this.val = text}).width(180);
     }
   },
 
   fieldlist(table, list, def, defname, parent, w){
-    if(w === undefined) w = 120;
     var b = new Button(Styles.logict);
     //var n = Number(def);
     //if(isNaN(n) || n < 0 || n >= list.length) this[defname] = 0;
@@ -114,6 +154,13 @@ const GetContStatement = {
         this[defname] = list.indexOf(t);
         if(parent !== false) this.buildt(parent);
     }, 2, cell => cell.size(100, 50)));
+    table.add(b).size(w, 40).color(table.color).left().padLeft(2);
+  },
+
+  fakelist(table, name, w){
+    var b = new Button(Styles.logict);
+    b.label(prov(() => name));
+    b.clicked(() => {});
     table.add(b).size(w, 40).color(table.color).left().padLeft(2);
   },
 

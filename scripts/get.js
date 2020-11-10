@@ -112,9 +112,14 @@ const GetContStatement = {
     //todo dropdown
     table.clearChildren();//this just sounds horrible
 
-    this.field(table, this.res, text => {this.res = text}).width(90);
-    table.add(" = ");
-    this.fieldlist(table, contentList, this.cont, "cont", table, 120);
+    table.table(cons(t => {
+      t.left();
+      t.setColor(table.color);
+      this.field(t, this.res, text => {this.res = text}).width(85);
+      t.add(" = ");
+      this.fieldlist(t, contentList, this.cont, "cont", table, 120);
+    })).left();
+
     this.row(table);
 
     if(this.cont == 9){
@@ -128,11 +133,13 @@ const GetContStatement = {
       else if(this.type == 2){
         this.fields(table, "r", this.val, text => {this.val = text});
         this.fields(table, "g", this.vg, text => {this.vg = text});
+        this.row(table);
         this.fields(table, "b", this.vb, text => {this.vb = text});
       }
       else if(this.type == 3){
         this.fields(table, "h", this.val, text => {this.val = text});
         this.fields(table, "s", this.vg, text => {this.vg = text});
+        this.row(table);
         this.fields(table, "v", this.vb, text => {this.vb = text});
       }
     }

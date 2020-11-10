@@ -198,30 +198,35 @@ const ActionStatement = {
         break;
 
       case 1:
+        this.row(table);
         table.table(cons(t => {
           t.left();
           t.setColor(table.color);
           t.add(" message");
           this.field(t, this.astr, text => {this.astr = text}).width(0).growX();
+          this.row(t);
           t.add(" title")
           this.field(t, this.atitle, text => {this.atitle = text}).width(180).padRight(3);
         })).left();
 
         table.row();
-        table.add();
+        if(!LCanvas.useRows()) table.add();
         table.table(cons(t => {
           t.left();
           t.setColor(table.color);
           t.add(" type");
           this.fieldlist(t, titleList, this.a1, "a1", table);
           this.fields(t, "duration", this.a2, text => {this.a2 = text});
+          this.row(t);
           this.fields(t, "x", this.ax, text => {this.ax = text});
           this.fields(t, "y", this.ay, text => {this.ay = text});
         })).left();
       break;
 
       case 2:
+        this.row(table);
         this.fields(table, "rule", this.astr, text => {this.astr = text}).width(180);
+        this.row(table);
         this.fields(table, "value", this.atitle, text => {this.atitle = text});
         break;
 
@@ -233,23 +238,38 @@ const ActionStatement = {
       case 4:
         table.add(" type");
         this.fieldlist(table, rateList, this.astr, "astr", table);
+        this.row(table);
         this.fields(table, "ticks", this.atitle, text => {this.atitle = text});
       break;
 
       case 5:
-        this.fields(table, "sound", this.astr, text => {this.astr = text}).width(120);
-        this.fields(table, "volume", this.atitle, text => {this.atitle = text});
-        this.fields(table, "pitch", this.a1, text => {this.a1 = text});
-        this.fields(table, "pan", this.a2, text => {this.a2 = text});
+        this.row(table);
+        table.table(cons(t => {
+          t.left();
+          t.setColor(table.color);
+          this.fields(t, "sound", this.astr, text => {this.astr = text});
+          this.fields(t, "volume", this.atitle, text => {this.atitle = text});
+          this.row(t);
+          this.fields(t, "pitch", this.a1, text => {this.a1 = text});
+          this.fields(t, "pan", this.a2, text => {this.a2 = text});
+        })).left();
       break;
 
       case 6:
-        this.field(table, this.astr, text => {this.astr = text}).width(85);
-        this.fields(table, "duration", this.atitle, text => {this.atitle = text});
-        this.fields(table, "intensity", this.a1, text => {this.a1 = text});
+        this.row(table);
+        this.field(table, this.astr, text => {this.astr = text}).width(85).left();
+        this.row(table);
+        table.table(cons(t => {
+          t.left();
+          t.setColor(table.color);
+          this.fields(t, "duration", this.atitle, text => {this.atitle = text});
+          this.fields(t, "intensity", this.a1, text => {this.a1 = text});
+        })).left();
+
       break;
 
       default:
+        this.row(table);
         table.add("[lightgray]invalid command[]");
     }
 

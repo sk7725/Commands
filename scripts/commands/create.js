@@ -107,27 +107,56 @@ const CreateStatement = {
     table.clearChildren();//this just sounds horrible
 
     this.fieldlist(table, cmdList, this.cmd, "cmd", table);
+    /*
     this.field(table, this.atype, text => {this.atype = text}).width(85);
     this.row(table);
     this.fields(table, "x", this.ax, text => {this.ax = text});
     this.fields(table, "y", this.ay, text => {this.ay = text});
-    this.row(table);
+    this.row(table);*/
     switch(Number(this.cmd)){
       case 0:
+        this.field(table, this.atype, text => {this.atype = text}).width(85);
+        this.row(table);
+        this.fields(table, "x", this.ax, text => {this.ax = text});
+        this.fields(table, "y", this.ay, text => {this.ay = text});
+        this.row(table);
         this.fields(table, "team", this.ar, text => {this.ar = text});
       break;
 
       case 1:
-        this.fields(table, "rotation", this.ar, text => {this.ar = text});
-        this.fields(table, "team", this.at, text => {this.at = text});
-        this.row(table);
-        this.fields(table, "velocity", this.av, text => {this.av = text});
-        this.fields(table, "lifetime", this.al, text => {this.al = text});
-        this.row(table);
-        this.fields(table, "damage", this.aowner, text => {this.aowner = text});
+        table.row();
+        table.table(cons(t => {
+          t.left();
+          t.setColor(table.color);
+          this.field(t, this.atype, text => {this.atype = text}).width(85);
+          this.row(t);
+          this.fields(t, "x", this.ax, text => {this.ax = text});
+          this.fields(t, "y", this.ay, text => {this.ay = text});
+          this.row(t);
+          this.fields(t, "rotation", this.ar, text => {this.ar = text});
+          this.fields(t, "team", this.at, text => {this.at = text});
+        })).left();
+
+        //this.row(table);
+        table.row();
+        if(!LCanvas.useRows()) table.add();
+        table.table(cons(t => {
+          t.left();
+          t.setColor(table.color);
+          this.fields(t, "velocity", this.av, text => {this.av = text});
+          this.fields(t, "lifetime", this.al, text => {this.al = text});
+          this.row(t);
+          this.fields(t, "damage", this.aowner, text => {this.aowner = text});
+        })).left();
+
       break;
 
       case 2:
+        this.field(table, this.atype, text => {this.atype = text}).width(85);
+        this.row(table);
+        this.fields(table, "x", this.ax, text => {this.ax = text});
+        this.fields(table, "y", this.ay, text => {this.ay = text});
+        this.row(table);
         this.fields(table, "rotation", this.ar, text => {this.ar = text});
         this.fields(table, "color", this.at, text => {this.at = text});
         //this.row();
@@ -135,15 +164,26 @@ const CreateStatement = {
       break;
 
       case 3:
+        this.field(table, this.atype, text => {this.atype = text}).width(85);
+        this.row(table);
+        this.fields(table, "x", this.ax, text => {this.ax = text});
+        this.fields(table, "y", this.ay, text => {this.ay = text});
+        this.row(table);
         this.fields(table, "pitch", this.ar, text => {this.ar = text});
         this.fields(table, "volume", this.at, text => {this.at = text});
       break;
 
       case 4:
+        this.field(table, this.atype, text => {this.atype = text}).width(85);
+        this.row(table);
+        this.fields(table, "x", this.ax, text => {this.ax = text});
+        this.fields(table, "y", this.ay, text => {this.ay = text});
+        this.row(table);
         this.fields(table, "amount", this.ar, text => {this.ar = text});
       break;
 
       default:
+        this.row(table);
         table.add("[lightgray]invalid command[]");
     }
 

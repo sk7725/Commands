@@ -1,4 +1,4 @@
-const cmdList = ["summon", "shoot", "fx", "playsound", "puddle"];//this playsound will at(), not play()
+const cmdList = ["summon", "shoot", "fx", "playsound", "puddle", "burn"];//this playsound will at(), not play()
 
 const cmdCategory = this.global.cmdCategory;
 
@@ -23,7 +23,7 @@ const CreateI = {
     var cx = vm.num(this.ax) * Vars.tilesize;
     var cy = vm.num(this.ay) * Vars.tilesize;
 
-    if(type == null || cx < 0 || cy < 0 || cx >= Vars.world.unitWidth() || cy >= Vars.world.unitHeight()) return;
+    if((type == null && cmd != 5) || cx < 0 || cy < 0 || cx >= Vars.world.unitWidth() || cy >= Vars.world.unitHeight()) return;
 
     switch(cmd){
       case 0:
@@ -65,6 +65,10 @@ const CreateI = {
       case 4:
         if(!(type instanceof Liquid) || Vars.world.tileWorld(cx, cy) == null) return;
         Puddles.deposit(Vars.world.tileWorld(cx, cy), type, vm.numf(this.ar));
+      break;
+      case 5:
+        if(Vars.world.tileWorld(cx, cy) == null) return;
+        Fires.create(Vars.world.tileWorld(cx, cy));
       break;
       default:
 
@@ -124,7 +128,7 @@ const CreateStatement = {
       break;
 
       case 1:
-        table.row();
+        this.row(table);
         table.table(cons(t => {
           t.left();
           t.setColor(table.color);
@@ -180,6 +184,11 @@ const CreateStatement = {
         this.fields(table, "y", this.ay, text => {this.ay = text});
         this.row(table);
         this.fields(table, "amount", this.ar, text => {this.ar = text});
+      break;
+
+      case 5:
+        this.fields(table, "x", this.ax, text => {this.ax = text});
+        this.fields(table, "y", this.ay, text => {this.ay = text});
       break;
 
       default:

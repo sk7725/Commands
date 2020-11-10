@@ -38,7 +38,9 @@ const CreateI = {
       break;
       case 2:
         if(Vars.headless) return;
-        var color = Color.valueOf(vm.obj(this.at) + "");
+        var color = vm.obj(this.at);
+        if((typeof color) == "string") color = Color.valueOf(color);
+        else color = Color.white;
         //print("FX ("+cx+", "+cy+")");
         try{
           Fx[type + ""].at(cx, cy, vm.numf(this.ar), color);

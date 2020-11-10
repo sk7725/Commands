@@ -23,7 +23,7 @@ const CreateI = {
     var cx = vm.num(this.ax) * Vars.tilesize;
     var cy = vm.num(this.ay) * Vars.tilesize;
 
-    if((type == null && cmd != 5) || cx < 0 || cy < 0 || cx >= Vars.world.unitWidth() || cy >= Vars.world.unitHeight()) return;
+    if((type == null && cmd != 5) || cx <= 0.00001 || cy <= 0.00001 || cx >= Vars.world.unitWidth() || cy >= Vars.world.unitHeight()) return;
 
     switch(cmd){
       case 0:

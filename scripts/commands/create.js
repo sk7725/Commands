@@ -34,7 +34,13 @@ const CreateI = {
         if(!Vars.net.client()) u.add();
       break;
       case 1:
-        //h
+        if(!(type instanceof BulletType)) return;
+        var team = Team.get(vm.numi(this.at));
+        //var owner = vm.obj(this.aowner);
+        //if(owner == "" || owner == null || (typeof owner) != "object") owner = null;
+        //else if(!(owner instanceof Entityc)) owner = null;
+        var dmg = (vm.vars[this.aowner].isobj) ? -1 : vm.numf(this.aowner);
+        type.create(null, team, cx, cy, vm.numf(this.ar), dmg, vm.numf(this.av), vm.numf(this.al), null);
       break;
       case 2:
         if(Vars.headless) return;
@@ -114,11 +120,11 @@ const CreateStatement = {
       case 1:
         this.fields(table, "rotation", this.ar, text => {this.ar = text});
         this.fields(table, "team", this.at, text => {this.at = text});
-        this.row();
+        this.row(table);
         this.fields(table, "velocity", this.av, text => {this.av = text});
         this.fields(table, "lifetime", this.al, text => {this.al = text});
-        this.row();
-        this.fields(table, "owner", this.aowner, text => {this.aowner = text});
+        this.row(table);
+        this.fields(table, "damage", this.aowner, text => {this.aowner = text});
       break;
 
       case 2:
@@ -192,5 +198,5 @@ LogicIO.allStatements.add(prov(() => CreateStatement.new([
   "1",
   "1",
   "1",
-  "1"
+  "-1"
 ])));

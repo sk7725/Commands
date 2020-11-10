@@ -1,4 +1,4 @@
-const cmdList = ["say", "title", "gamerule", "gamemode", "ratelimit", "playsound"];//this playsound will play(), not at()
+const cmdList = ["say", "title", "gamerule", "gamemode", "ratelimit", "playsound", "weather"];//this playsound will play(), not at()
 const rateList = ["say", "popuptitle", "texttitle"];
 const titleList = ["hud", "world", "announce", "infoMessage", "infoToast"];
 const gamemodeList = ["survival", "sandbox", "attack", "pvp", "editor"];
@@ -144,6 +144,13 @@ const ActionI = {
         catch(notFound){}
       break;
 
+      case 6:
+        //weather
+        var weather = vm.obj(this.astr);
+        if(!(weather instanceof Weather)) return;
+        if(!weather.isActive()) weather.create(vm.numf(this.a1), vm.numf(this.atitle));
+      break;
+
       default:
 
       //end
@@ -230,10 +237,16 @@ const ActionStatement = {
       break;
 
       case 5:
-        this.fields(table, "sounds", this.astr, text => {this.astr = text}).width(120);
+        this.fields(table, "sound", this.astr, text => {this.astr = text}).width(120);
         this.fields(table, "volume", this.atitle, text => {this.atitle = text});
         this.fields(table, "pitch", this.a1, text => {this.a1 = text});
         this.fields(table, "pan", this.a2, text => {this.a2 = text});
+      break;
+
+      case 6:
+        this.field(table, this.astr, text => {this.astr = text}).width(85);
+        this.fields(table, "duration", this.atitle, text => {this.atitle = text});
+        this.fields(table, "intensity", this.a1, text => {this.a1 = text});
       break;
 
       default:

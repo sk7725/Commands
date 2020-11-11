@@ -179,7 +179,7 @@ const EntityI = {
       var amount = vm.numi(this.ay);
       if(amount == 0) return;
       if(amount > 0){
-        var real = (vm.numi(this.ar) == 0) ? ent.acceptStack(item, amount, null) : Math.min(amount, ent.getMaximumAccepted(item) - ent.items.get(item));
+        var real = (vm.numi(this.ar) == 0 || (ent.block instanceof Turret)) ? ent.acceptStack(item, amount, null) : Math.min(amount, ent.getMaximumAccepted(item) - ent.items.get(item));
         if(real <= 0) return;
         ent.handleStack(item, real, null);
       }

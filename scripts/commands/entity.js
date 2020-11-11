@@ -54,8 +54,13 @@ const EntityI = {
         //give
         if(ent == null) return;
         var item = vm.obj(this.ax);
-        if(!(item instanceof Item)) return;
-        this.give(vm, ent, item);
+        if(item == null) return;
+        if(item instanceof Item){
+          this.give(vm, ent, item);
+        }
+        else if(item instanceof Liquid){
+          this.giveliquid(vm, ent, item);
+        }
       break;
       case 4:
         //clear
@@ -186,6 +191,22 @@ const EntityI = {
       else{
         ent.items.remove(item, -1 * amount);
       }
+    }
+  },
+  giveliquid(vm, ent, liquid){
+    if(!(ent instanceof Building) || (ent.block instanceof LiquidTurret)) return;
+    if(ent.liquids == null) return;
+    var amount = vm.numf(this.ay);
+    if(amount == 0) return;
+    if(amount > 0){
+      if(!(vm.numi(this.ar) == 0) || (ent.block.hasLiquids && ent.block.consumes != null && ent.block.consumes.liquidfilters.get(liquid.id))){
+        var real = Math.min(amount, ent.block.liquidCapacity - ent.liquids.get(liquid));
+        if(real <= 0) return;
+        ent.liquids.add(liquid, amount);
+      }
+    }
+    else{
+      ent.liquids.add(liquid, Math.max(amount, -1 * ent.liquids.get(liquid)));
     }
   }
 };

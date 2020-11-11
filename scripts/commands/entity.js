@@ -50,6 +50,18 @@ const EntityI = {
         if(ent == null) return;
         this.kill(vm, ent);
       break;
+      case 3:
+        //give
+        if(ent == null) return;
+        var item = vm.obj(this.ax);
+        if(!(item instanceof Item)) return;
+        this.give(vm, ent, item);
+      break;
+      case 4:
+        //clear
+        if(ent == null) return;
+        this.clear(vm, ent);
+      break;
       case 5:
         //kill
         if(ent == null) return;
@@ -100,6 +112,7 @@ const EntityI = {
   },
   kill(vm, ent){
     if(ent instanceof Healthc) ent.kill();
+    else if(ent instanceof Bullet) ent.remove();
   },
   damage(vm, ent){
     if(!(ent instanceof Healthc)) return;
@@ -144,8 +157,36 @@ const EntityI = {
     }
   },
   team(vm, ent){
-    if(!(ent instanceof Teamc)) return;
-    ent.team = Team.get(vm.numi(this.ax));
+    if(ent instanceof Unit){
+      if(ent.isPlayer()) ent.getPlayer().team(Team.get(vm.numi(this.ax)));
+      else ent.team = Team.get(vm.numi(this.ax));
+    }
+    else if(ent instanceof Teamc){
+      ent.team = Team.get(vm.numi(this.ax));
+    }
+  },
+  clear(vm, ent){
+    if(ent instanceof Itemsc){
+      ent.clearItem();
+    }
+    else if((ent instanceof Building) && ent.items != null) ent.items.clear();
+  },
+  give(vm, ent, item){
+    if(ent instanceof Itemsc){
+      if(!(vm.numi(this.ar) == 0) || ent.acceptsItem(item)) ent.addItem(item, vm.numi(this.ay));
+    }
+    else if((ent instanceof Building) && ent.items != null){
+      var amount = vm.numi(this.ay);
+      if(amount == 0) return;
+      if(amount > 0){
+        var real = (vm.numi(this.ar) == 0) ? ent.acceptStack(item, amount, null) : Math.min(amount, ent.getMaximumAccepted(item) - ent.items.get(item));
+        if(real <= 0) return;
+        ent.handleStack(item, real, null);
+      }
+      else{
+        ent.items.remove(item, -1 * amount);
+      }
+    }
   }
 };
 

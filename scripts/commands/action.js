@@ -1,10 +1,11 @@
 const cmdList = ["say", "title", "gamerule", "gamemode", "ratelimit", "playsound", "weather"];//this playsound will play(), not at()
-const rateList = ["say", "popuptitle", "texttitle"];
+const rateList = ["say", "popuptitle", "texttitle", "bind"];
 const titleList = ["hud", "world", "announce", "infoMessage", "infoToast"];
 const gamemodeList = ["survival", "sandbox", "attack", "pvp", "editor"];
 
 var ratetimer = new Interval(1);//serverside ratelimit interval
-var ratelimitlist = [60, 180, 10];
+var ratelimitlist = [60, 180, 10, 70];
+this.global.commands.ratelimitlist = ratelimitlist;
 
 var prevecore = null;
 
@@ -119,7 +120,7 @@ const ActionI = {
         if(Vars.net.client()) return;
         var type = vm.numi(this.astr);
         var ticks = vm.numi(this.atitle);
-        if(type < 0 || type > 2 || ticks < 0) return;
+        if(type < 0 || type > 3 || ticks < 0) return;
         ratelimitlist[type] = ticks;
       break;
 

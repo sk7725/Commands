@@ -1,3 +1,5 @@
+this.global.commands = {};
+
 require("cmd/commands/action");
 require("cmd/commands/create");
 require("cmd/commands/entity");

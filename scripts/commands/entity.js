@@ -6,6 +6,9 @@ const giveList = ["keep", "force"];
 
 const cmdCategory = this.global.cmdCategory;
 
+var ratetimer = new Interval(1);
+var rllist = this.global.commands.ratelimitlist;
+
 //partial credits to DeltaNedas
 const EntityI = {
   _(builder, cmd, atype, ax, ay, ar, at, av) {
@@ -76,6 +79,36 @@ const EntityI = {
         //kill
         if(ent == null) return;
         this.team(vm, ent);
+      break;
+      case 7:
+        //bind
+        if(ent == null) return;
+        if((ent instanceof Unit) && ent.isPlayer()){
+          var cunit = vm.obj(this.ax);
+          if(cunit == ent) return;
+          if(cunit == null){
+            if(!ent.spawnedByCore) this.unbind(vm, ent);
+          }
+          else if((cunit instanceof Unit) && !cunit.isPlayer()){
+            this.bind(vm, ent, cunit);
+          }
+          else if((cunit instanceof ControlBlock) && cunit.canControl() && !cunit.isControlled()){
+            this.bind(vm, ent, cunit.unit);
+          }
+        }
+        else if((ent instanceof ControlBlock) && ent.isControlled()){
+          var cunit = vm.obj(this.ax);
+          if(cunit == ent) return;
+          if(cunit == null){
+            this.unbind(vm, ent.unit);
+          }
+          else if((cunit instanceof Unit) && !cunit.isPlayer()){
+            this.bind(vm, ent.unit, cunit);
+          }
+          else if((cunit instanceof ControlBlock) && cunit.canControl() && !cunit.isControlled()){
+            this.bind(vm, ent.unit, cunit.unit);
+          }
+        }
       break;
       default:
 
@@ -207,6 +240,19 @@ const EntityI = {
     }
     else{
       ent.liquids.add(liquid, Math.max(amount, -1 * ent.liquids.get(liquid)));
+    }
+  },
+  bind(vm, player, unit){
+    if(Vars.player == player.getPlayer() && ratetimer.get(0, rllist[3])){
+      Call.unitControl(player.getPlayer(), unit);
+      Vars.control.input.shouldShoot = false;
+    }
+  },
+  unbind(vm, player){
+    //call should work...?
+    if(Vars.player == player.getPlayer() && ratetimer.get(0, rllist[3])){
+      Call.unitClear(player.getPlayer());
+      Vars.control.input.controlledType = null;
     }
   }
 };

@@ -1,9 +1,11 @@
 const cmdList = ["say", "title", "gamerule", "gamemode", "ratelimit", "playsound", "weather"];//this playsound will play(), not at()
 const rateList = ["say", "popuptitle", "texttitle", "bind"];
-const titleList = ["hud", "world", "announce", "infoMessage", "infoToast"];
+const titleList = ["hud", "world", "announce", "infoToast", "popup", "infoPopup", "error", "notice"];
+const rltype = [2, 2, 2, 2, 1, 1, 1, 1];
+
 const gamemodeList = ["survival", "sandbox", "attack", "pvp", "editor"];
 
-var ratetimer = new Interval(1);//serverside ratelimit interval
+var ratetimer = new Interval(3);//serverside ratelimit interval
 var ratelimitlist = [60, 180, 10, 70];
 this.global.commands.ratelimitlist = ratelimitlist;
 
@@ -11,6 +13,8 @@ var prevecore = null;
 
 this.global.cmdCategory = Pal.accent;
 const cmdCategory = this.global.cmdCategory;
+
+//const iconList = Object.keys(Icon).filter(s => (typeof Icon[s]) == "object").sort();
 
 //partial credits to DeltaNedas
 const ActionI = {
@@ -41,7 +45,59 @@ const ActionI = {
       break;
 
       case 1:
-        //title
+        var mode = vm.numi(this.a1);
+        var str = vm.obj(this.astr) + "";
+        if(mode < 0 || mode >= titleList.length) return;
+        var rt = rltype[mode];
+        if(Vars.headless || !ratetimer.check(rt, ratelimitlist[rt])) return;
+        //Vars.ui.hudfrag.showToast(icon, text), (text)
+        switch(mode){
+          case 0:
+            if(!vm.bool(this.astr)) Vars.ui.hudfrag.toggleHudText(false);
+            else Vars.ui.hudfrag.setHudText(str);
+          break;
+          case 1:
+            var duration = vm.numf(this.a2);
+            if(duration <= 0) return;
+            var cx = vm.numf(this.ax) * Vars.tilesize; var cy = vm.numf(this.ay) * Vars.tilesize;
+            if(cx <= 0.00001 || cy <= 0.00001 || cx >= Vars.world.unitWidth() || cy >= Vars.world.unitHeight()) return;
+            Vars.ui.showLabel(str, duration / 60, cx, cy);
+          break;
+          case 2:
+            var duration = vm.numf(this.a2);
+            if(duration <= 0) return;
+            Vars.ui.announce(str, duration / 60);
+          break;
+          case 3:
+            var duration = vm.numf(this.a2);
+            if(duration <= 0) return;
+            Vars.ui.showInfoToast(str, duration / 60);
+          break;
+          case 4:
+            var title = vm.obj(this.atitle) + "";
+            if(title == "null" || title == "undefined") title = "";
+            Vars.ui.showText(title, str);
+          break;
+          case 5:
+            var title = vm.obj(this.atitle) + "";
+            if(title == "null" || title == "undefined") title = "";
+            Vars.ui.showInfoText(title, str);
+          break;
+          case 6:
+            Vars.ui.showErrorMessage(str);
+          break;
+          case 7:
+            var icon = vm.obj(this.atitle);
+            try{
+              Vars.ui.hudfrag.showToast(Icon[icon + ""], str);
+            }
+            catch(notFound){
+              Vars.ui.hudfrag.showToast(str);
+            }
+          break;
+          default:
+        }
+        ratetimer.reset(rt, 0);
       break;
 
       case 2:
@@ -149,6 +205,7 @@ const ActionI = {
         //weather
         var weather = vm.obj(this.astr);
         if(!(weather instanceof Weather)) return;
+        //print(weather);
         if(!weather.isActive()) weather.create(vm.numf(this.a1), vm.numf(this.atitle));
       break;
 
@@ -167,7 +224,7 @@ const ActionStatement = {
   },
 
   read(words) {
-    this.cmd = words[1];
+    this.cmd = (isNaN(Number(words[1]))) ? cmdList.indexOf(words[1]) : words[1];
     this.astr = words[2];
     this.atitle = words[3];
     this.a1 = words[4];
@@ -205,9 +262,12 @@ const ActionStatement = {
           t.setColor(table.color);
           t.add(" message");
           this.field(t, this.astr, text => {this.astr = text}).width(0).growX();
-          this.row(t);
-          t.add(" title")
-          this.field(t, this.atitle, text => {this.atitle = text}).width(180).padRight(3);
+          if(this.a1 == 4 || this.a1 == 5 || this.a1 == 7){
+            this.row(t);
+            t.add((this.a1 == 7)? " icon" : " title");
+            this.field(t, this.atitle, text => {this.atitle = text}).width(180).padRight(3);
+          }
+
         })).left();
 
         table.row();
@@ -217,10 +277,13 @@ const ActionStatement = {
           t.setColor(table.color);
           t.add(" type");
           this.fieldlist(t, titleList, this.a1, "a1", table);
-          this.fields(t, "duration", this.a2, text => {this.a2 = text});
-          this.row(t);
-          this.fields(t, "x", this.ax, text => {this.ax = text});
-          this.fields(t, "y", this.ay, text => {this.ay = text});
+          if(this.a1 == 1 || this.a1 == 2 || this.a1 == 3) this.fields(t, "duration", this.a2, text => {this.a2 = text});
+          //hud, world, announce, infomessage, infotoast
+          if(this.a1 == 1){
+            this.row(t);
+            this.fields(t, "x", this.ax, text => {this.ax = text});
+            this.fields(t, "y", this.ay, text => {this.ay = text});
+          }
         })).left();
       break;
 
@@ -289,7 +352,7 @@ const ActionStatement = {
   },
 
   write(builder) {
-    builder.append("cmdaction " + this.cmd + "");
+    builder.append("cmdaction " + cmdList[this.cmd] + "");
     builder.append(" ");
     builder.append(this.astr + "");
     builder.append(" ");

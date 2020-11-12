@@ -85,7 +85,7 @@ const CreateStatement = {
   },
 
   read(words) {
-    this.cmd = words[1];
+    this.cmd = (isNaN(Number(words[1]))) ? cmdList.indexOf(words[1]) : words[1];
     this.atype = words[2];
     this.ax = words[3];
     this.ay = words[4];
@@ -211,7 +211,7 @@ const CreateStatement = {
   },
 
   write(builder) {
-    builder.append("cmdcreate " + this.cmd + "");
+    builder.append("cmdcreate " + cmdList[this.cmd] + "");
     builder.append(" ");
     builder.append(this.atype + "");
     builder.append(" ");

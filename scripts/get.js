@@ -94,7 +94,7 @@ const GetContStatement = {
 
   read(words) {
     this.res = words[1];
-    this.cont = words[2];
+    this.cont = (isNaN(Number(words[2]))) ? contentList.indexOf(words[2]) : words[2];
     this.type = words[3];
     this.val = words[4];
     this.vg = words[5];
@@ -193,7 +193,7 @@ const GetContStatement = {
   write(builder) {
     builder.append("getcont " + this.res + "");
     builder.append(" ");
-    builder.append(this.cont + "");
+    builder.append(contentList[this.cont] + "");
     builder.append(" ");
     builder.append(this.type + "");
     builder.append(" ");

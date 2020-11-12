@@ -265,7 +265,7 @@ const EntityStatement = {
   },
 
   read(words) {
-    this.cmd = words[1];
+    this.cmd = (isNaN(Number(words[1]))) ? cmdList.indexOf(words[1]) : words[1];
     this.atype = words[2];
     this.ax = words[3];
     this.ay = words[4];
@@ -390,7 +390,7 @@ const EntityStatement = {
   },
 
   write(builder) {
-    builder.append("cmdentity " + this.cmd + "");
+    builder.append("cmdentity " + cmdList[this.cmd] + "");
     builder.append(" ");
     builder.append(this.atype + "");
     builder.append(" ");

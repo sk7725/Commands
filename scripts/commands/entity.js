@@ -245,7 +245,7 @@ const EntityI = {
   bind(vm, player, unit){
     if(Vars.player == player.getPlayer() && ratetimer.get(0, rllist[3])){
       Call.unitControl(player.getPlayer(), unit);
-      Vars.control.input.shouldShoot = false;
+      if(!Vars.mobile) Vars.control.input.shouldShoot = false;
     }
   },
   unbind(vm, player){

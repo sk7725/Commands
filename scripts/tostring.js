@@ -6,7 +6,8 @@ const ToStrI = {
   },
 
   run(vm) {
-    vm.setobj(this.res, vm.obj(this.cont) + "");
+    var h = vm.obj(this.cont);
+    vm.setobj(this.res, (typeof h.toString) == "function" ? h.toString() : h + "");
   }
 };
 

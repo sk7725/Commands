@@ -42,7 +42,7 @@ const SetblockI = {
           return;
         }
 
-        if(mode == 1 && checkEmpty(tile, block.size)) return;
+        if(mode == 1 && !checkEmpty(tile, block.size)) return;
         if(mode == 2 && tile.build != null){
           //break old block
           tile.build.kill();

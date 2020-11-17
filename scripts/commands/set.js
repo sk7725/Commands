@@ -42,7 +42,7 @@ const SetblockI = {
           return;
         }
 
-        if(mode == 1 && tile.block().name != "air") return;
+        if(mode == 1 && checkEmpty(tile, block.size)) return;
         if(mode == 2 && tile.build != null){
           //break old block
           tile.build.kill();
@@ -61,6 +61,17 @@ const SetblockI = {
 
       //end
     }
+  },
+  checkEmpty(tile, size){
+    if(size <= 1) return tile.block().name == "air";
+    var off = Mathf.floorPositive((size - 1)/2);
+    var end = Mathf.floorPositive(size / 2);
+    for(var i = -1*off; i <= end; i++){
+      for(var j = -1*off; j <= end; j++){
+        if(tile.nearby(i, j).block().name != "air") return false;
+      }
+    }
+    return true;
   }
 };
 

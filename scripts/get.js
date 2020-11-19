@@ -95,7 +95,9 @@ const GetContStatement = {
   read(words) {
     this.res = words[1];
     this.cont = (isNaN(Number(words[2]))) ? contentList.indexOf(words[2]) : words[2];
-    this.type = words[3];
+    if(this.cont == 5) this.type = words[3];
+    else if(this.cont == 9) this.type = (isNaN(Number(words[3]))) ? colorTypeList.indexOf(words[3]) : words[3];
+    else this.type = (isNaN(Number(words[3]))) ? typeList.indexOf(words[3]) : words[3];
     this.val = words[4];
     this.vg = words[5];
     this.vb = words[6];
@@ -195,7 +197,10 @@ const GetContStatement = {
     builder.append(" ");
     builder.append(contentList[this.cont] + "");
     builder.append(" ");
-    builder.append(this.type + "");
+    if(this.cont == 5) builder.append("name");
+    else if(this.cont == 9) builder.append(colorTypeList[this.type] + "");
+    else builder.append(typeList[this.type] + "");
+
     builder.append(" ");
     builder.append(this.val + "");
     builder.append(" ");

@@ -7,7 +7,8 @@ const ToStrI = {
 
   run(vm) {
     var h = vm.obj(this.cont);
-    vm.setobj(this.res, (typeof h.toString) == "function" ? h.toString() : h + "");
+    if(h == null && !Mathf.zero(vm.num(this.cont))) h = vm.num(this.cont);
+    vm.setobj(this.res, (h == null || (typeof h) != "object") ? h + "" : ((typeof h.toString) == "function" ? h.toString() : h + ""));
   }
 };
 
